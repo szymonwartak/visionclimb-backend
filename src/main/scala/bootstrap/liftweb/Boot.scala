@@ -11,7 +11,7 @@ import Loc._
 import mapper._
 
 import code.model._
-
+import code.lib._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -77,5 +77,9 @@ class Boot {
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)
+
+		// REST API
+		LiftRules.dispatch.append(ClimageUpload) // stateful — associated with a servlet container session
+		//LiftRules.statelessDispatchTable.append(ClimageUpload)
   }
 }

@@ -6,13 +6,57 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <h2>Welcome to your project!</h2>
+			<!-- head -->
+			<script type="text/javascript" class="lift:head" src="/js/climage.js"></script>
+			<script type="text/javascript" class="lift:head">
+				var img = new Image();
+				$(document).ready(function() {
+					var img = new Image();
+					img.onload = function() {
+						$('#canvas')[0].getContext('2d').drawImage(img,0,0,300,200);
+					};
+					img.src = '/images/asdf.png';
+
+					// setup climbing image behaviour
+					var currentClimage = new Climage();
+					$('#canvas').click(function(e) {
+						currentClimage.addRoutePoint(e.clientX-$("#canvas").offset().left, e.clientY-$("#canvas").offset().top);
+					});
+				});
+				function post() {
+					var imageData = $('#canvas')[0].toDataURL();
+//					$('#output').append(imageData);
+					$.ajax({
+						type: 'POST',
+						url: 'http://localhost:8080/api/route/postworks',
+						data: {"name": "asdf", "description": "qwerqwer"},
+						success: function(data) { alert(data); },
+						contentType: 'application/x-www-form-urlencoded'
+					});
+				}
+				function get() {
+					$.ajax({
+						url: 'http://localhost:8080/api/route/get/123',
+						data: {id:'123'},
+						success: function(data) { alert(data); },
+						dataType: 'json'
+					});
+				}
+			</script>
+
+			<!-- body -->
+			<h2>Welcome to your project!</h2>
       <p>
-	<span class="lift:helloWorld.howdy">
-	  Welcome to your Lift app at <span id="time">Time goes here</span>
-	</span>
+				<span class="lift:helloWorld.howdy">
+					Welcome to your Lift-- app at <span id="times">Time goes here</span>
+				</span>
       </p>
-    </div>
+
+			<canvas width="300" height="200" id="canvas"></canvas>
+			<input type="submit" onclick="post()" value="send"/>
+			<input type="submit" onclick="get()" value="receive"/>
+			<div id="output"></div>
+		</div>
   </body>
 </html>
 

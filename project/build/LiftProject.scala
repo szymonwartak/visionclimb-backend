@@ -14,6 +14,8 @@ class LiftProject(info: ProjectInfo) extends DefaultWebProject(info) {
 
   val SonatypeRep = "Sonatype scala-tools repo" at "https://oss.sonatype.org/content/groups/scala-tools/"
 
+  val twttr = "Twitter's Repository" at "http://maven.twttr.com/"
+
   override def libraryDependencies = Set(
     "net.liftweb" %% "lift-webkit" % liftVersion.value.toString % "compile",
     "net.liftweb" %% "lift-mapper" % liftVersion.value.toString % "compile",
@@ -21,6 +23,7 @@ class LiftProject(info: ProjectInfo) extends DefaultWebProject(info) {
     "junit" % "junit" % "4.7" % "test",
     "ch.qos.logback" % "logback-classic" % "0.9.26",
     "org.scala-tools.testing" %% "specs" % "1.6.8" % "test",
-    "com.h2database" % "h2" % "1.2.147"
+    "com.h2database" % "h2" % "1.2.147",
+    "com.twitter" % "cassie" % "0.19.0"
   ) ++ super.libraryDependencies
 }
