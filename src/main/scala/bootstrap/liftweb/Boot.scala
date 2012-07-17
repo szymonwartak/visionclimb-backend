@@ -82,4 +82,8 @@ class Boot {
 		LiftRules.dispatch.append(ClimageUpload) // stateful — associated with a servlet container session
 		//LiftRules.statelessDispatchTable.append(ClimageUpload)
   }
+
+	// force the initialization of the data classes (the allRoutes query is stalling for some reason if this isn't done this way)
+	import RouteData.seqIdCount
+	seqIdCount.get()
 }

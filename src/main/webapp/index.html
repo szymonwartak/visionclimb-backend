@@ -9,31 +9,51 @@
 			<!-- head -->
 			<script type="text/javascript" class="lift:head" src="/js/climage.js"></script>
 			<script type="text/javascript" class="lift:head">
-				var img = new Image();
+				// setup climbing image behaviour
+				var currentClimage = new Climage();
 				$(document).ready(function() {
 					var img = new Image();
 					img.onload = function() {
 						$('#canvas')[0].getContext('2d').drawImage(img,0,0,300,200);
 					};
 					img.src = '/images/asdf.png';
-
-					// setup climbing image behaviour
-					var currentClimage = new Climage();
 					$('#canvas').click(function(e) {
 						currentClimage.addRoutePoint(e.clientX-$("#canvas").offset().left, e.clientY-$("#canvas").offset().top);
 					});
+
+					$.getJSON('api/route/getRoutes', function(data) {
+						var items = [];
+						data.map( function(route) {
+							items.push('<option value="'+route+'">'+route+'</option>');
+						});
+//						$('<select/>', {
+//							'id': 'routeSelector',
+//							html: items.join('')
+//						}).appendTo('#routeList');
+						$('#routeSelector').html(items.join(''))
+					});
+					$('#routeSelector').change(function() {
+						$('#routeSelector option:selected').each(function() {
+							alert($(this).text()+"_"+$(this).value)
+						});
+					});
 				});
+
+
 				function post() {
 					var imageData = $('#canvas')[0].toDataURL();
 //					$('#output').append(imageData);
+					alert(JSON.stringify(currentClimage.routePointsY))
 					$.ajax({
 						type: 'POST',
 						url: 'http://localhost:8080/api/route/postworks',
-						data: {"name": "asdf", "description": "qwerqwer"},
+						data: {name: $('#routeName')[0].value, x:JSON.stringify(currentClimage.routePointsX), y:JSON.stringify(currentClimage.routePointsY)},
 						success: function(data) { alert(data); },
 						contentType: 'application/x-www-form-urlencoded'
 					});
 				}
+
+
 				function get() {
 					$.ajax({
 						url: 'http://localhost:8080/api/route/get/123',
@@ -52,10 +72,16 @@
 				</span>
       </p>
 
-			<canvas width="300" height="200" id="canvas"></canvas>
-			<input type="submit" onclick="post()" value="send"/>
-			<input type="submit" onclick="get()" value="receive"/>
-			<div id="output"></div>
+			<span class="lift:climageSearch.controls">
+				<!--<span id="routeList"/>-->
+				<select id="routeSelector"></select>
+
+				<canvas width="300" height="200" id="canvas"></canvas>
+				<input type="text" id="routeName"/>
+				<input type="submit" onclick="post()" value="send"/>
+				<input type="submit" onclick="get()" value="receive"/>
+				<div id="output"></div>
+			</span>
 		</div>
   </body>
 </html>

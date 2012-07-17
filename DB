@@ -1,0 +1,15 @@
+cassie version - (core,hadoop,..): 0.19.0
+finagle version - core:1.11.0,
+Cassandra data model
+--------------------
+keyspace: CLIMAGE
+column family: Routes (
+
+
+
+init
+----
+assume Routes keys as utf8;
+assume Routes comparator as utf8;
+assume Routes validator as utf8;
+get Routes['1'];
