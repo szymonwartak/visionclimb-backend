@@ -2,7 +2,6 @@ package bootstrap.liftweb
 
 import net.liftweb._
 import util._
-import Helpers._
 
 import common._
 import http._
@@ -84,6 +83,6 @@ class Boot {
   }
 
 	// force the initialization of the data classes (the allRoutes query is stalling for some reason if this isn't done this way)
-	import RouteData.seqIdCount
-	seqIdCount.get()
+	import RouteData.routeSeqId
+	routeSeqId.get()
 }

@@ -16,14 +16,15 @@ object ClimageUpload extends RestHelper with Logging {
 			RouteDAO.getByRouteId(id)
 		}
 		case "getRoutes" :: _ JsonGet _ => {
-			log.debug("getting all route names.....")
+			log.debug("getting all route names....."+RouteData.allRoutes.toString())
 			JArray(RouteData.allRoutes)
 		}
 		case "postworks" :: _ Post req => {
 			RouteDAO.insertRoute(
 				req.param("name") openOr "a route",
-				req.param("xCoords") openOr "[]",
-				req.param("yCoords") openOr "[]"
+				req.param("routePointsX") openOr "[]",
+				req.param("routePointsY") openOr "[]",
+				req.param("image") openOr ""
 			)
 			JInt(9999)
 		}

@@ -10,21 +10,18 @@
 			<script type="text/javascript" class="lift:head" src="/js/climage.js"></script>
 			<script type="text/javascript" class="lift:head">
 				// setup climbing image behaviour
-				var currentClimage = new Climage();
+				var currentClimage;
 				$(document).ready(function() {
-					var img = new Image();
-					img.onload = function() {
-						$('#canvas')[0].getContext('2d').drawImage(img,0,0,300,200);
-					};
-					img.src = '/images/asdf.png';
+					currentClimage = new Climage();
+//					currentClimage.takePicture();
 					$('#canvas').click(function(e) {
 						currentClimage.addRoutePoint(e.clientX-$("#canvas").offset().left, e.clientY-$("#canvas").offset().top);
 					});
 
 					$.getJSON('api/route/getRoutes', function(data) {
-						var items = [];
+						var items = ['<option></option>'];
 						data.map( function(route) {
-							items.push('<option value="'+route+'">'+route+'</option>');
+							items.push('<option value="'+route.id+'">'+route.name+'</option>');
 						});
 //						$('<select/>', {
 //							'id': 'routeSelector',
@@ -33,9 +30,7 @@
 						$('#routeSelector').html(items.join(''))
 					});
 					$('#routeSelector').change(function() {
-						$('#routeSelector option:selected').each(function() {
-							alert($(this).text()+"_"+$(this).value)
-						});
+						getRoute($('#routeSelector option:selected').val())
 					});
 				});
 
@@ -43,23 +38,26 @@
 				function post() {
 					var imageData = $('#canvas')[0].toDataURL();
 //					$('#output').append(imageData);
-					alert(JSON.stringify(currentClimage.routePointsY))
 					$.ajax({
 						type: 'POST',
 						url: 'http://localhost:8080/api/route/postworks',
-						data: {name: $('#routeName')[0].value, x:JSON.stringify(currentClimage.routePointsX), y:JSON.stringify(currentClimage.routePointsY)},
-						success: function(data) { alert(data); },
+						data: {
+							name: $('#routeName')[0].value,
+							routePointsX: JSON.stringify(currentClimage.routePointsX),
+							routePointsY: JSON.stringify(currentClimage.routePointsY),
+							image: currentClimage.image
+						},
+						success: function(data) {
+							alert(data);
+						},
 						contentType: 'application/x-www-form-urlencoded'
 					});
 				}
 
 
-				function get() {
-					$.ajax({
-						url: 'http://localhost:8080/api/route/get/123',
-						data: {id:'123'},
-						success: function(data) { alert(data); },
-						dataType: 'json'
+				function getRoute(routeNum) {
+					$.getJSON('http://localhost:8080/api/route/get/'+routeNum, function(data) {
+						currentClimage.drawRoute(data.name, data.image, $.parseJSON(data.routePointsX), $.parseJSON(data.routePointsY));
 					});
 				}
 			</script>
