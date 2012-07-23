@@ -1,86 +1,60 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
     <title>Home</title>
-  </head>
-  <body class="lift:content_id=main">
-    <div id="main" class="lift:surround?with=default;at=content">
-			<!-- head -->
-			<script type="text/javascript" class="lift:head" src="/js/climage.js"></script>
-			<script type="text/javascript" class="lift:head">
-				// setup climbing image behaviour
-				var currentClimage;
-				$(document).ready(function() {
-					currentClimage = new Climage();
-//					currentClimage.takePicture();
-					$('#canvas').click(function(e) {
-						currentClimage.addRoutePoint(e.clientX-$("#canvas").offset().left, e.clientY-$("#canvas").offset().top);
-					});
+</head>
+<body class="lift:content_id=main">
+<div id="main" class="lift:surround?with=default;at=content">
+    <!-- head -->
+    <script type="text/javascript" class="lift:head" src="/js/climage.js"></script>
+    <script type="text/javascript" class="lift:head" src="/js/rest.js"></script>
+    <script type="text/javascript" class="lift:head">
+        // setup climbing image behaviour
+        var currentClimage;
+        $(document).bind('ready',function(event) {
+            currentClimage = new Climage();
+            $('#canvas').click(function(e) {
+                $('#output').append(1);
+                currentClimage.addRoutePoint(e.clientX-$("#canvas").offset().left, e.clientY-$("#canvas").offset().top);
+            });
 
-					$.getJSON('api/route/getRoutes', function(data) {
-						var items = ['<option></option>'];
-						data.map( function(route) {
-							items.push('<option value="'+route.id+'">'+route.name+'</option>');
-						});
+            $('#output').append(2);
+            $.getJSON('http://'+server+'/api/route/getRoutes', function(data) {
+                $('#output').append(3);
+                var items = ['<option></option>'];
+                data.map( function(route) {
+                    items.push('<option value="'+route.id+'">'+route.name+'</option>');
+                });
 //						$('<select/>', {
 //							'id': 'routeSelector',
 //							html: items.join('')
 //						}).appendTo('#routeList');
-						$('#routeSelector').html(items.join(''))
-					});
-					$('#routeSelector').change(function() {
-						getRoute($('#routeSelector option:selected').val())
-					});
-				});
+                $('#routeSelector').html(items.join(''))
+            });
+            $('#output').append(4);
+            $('#routeSelector').change(function() {
+                getRoute($('#routeSelector option:selected').val())
+            });
+        });
+    </script>
 
+    <!-- body -->
+    <h2>Welcome to your project!</h2>
 
-				function post() {
-					var imageData = $('#canvas')[0].toDataURL();
-//					$('#output').append(imageData);
-					$.ajax({
-						type: 'POST',
-						url: 'http://localhost:8080/api/route/postworks',
-						data: {
-							name: $('#routeName')[0].value,
-							routePointsX: JSON.stringify(currentClimage.routePointsX),
-							routePointsY: JSON.stringify(currentClimage.routePointsY),
-							image: currentClimage.image
-						},
-						success: function(data) {
-							alert(data);
-						},
-						contentType: 'application/x-www-form-urlencoded'
-					});
-				}
+    <!--<span class="lift:climageSearch.controls">-->
+    <!--<span id="routeList"/>-->
+    <select id="routeSelector"></select>
+    <input type="submit" onclick="location.reload()" value="reload"/>
 
+    <canvas width="300" height="200" id="canvas"></canvas>
+    <input type="text" id="routeName"/>
+    <input type="submit" onclick="postClimage()" value="send"/>
+    <input type="submit" onclick="currentClimage.takePicture()" value="picture"/>
+    <div id="output"></div>
 
-				function getRoute(routeNum) {
-					$.getJSON('http://localhost:8080/api/route/get/'+routeNum, function(data) {
-						currentClimage.drawRoute(data.name, data.image, $.parseJSON(data.routePointsX), $.parseJSON(data.routePointsY));
-					});
-				}
-			</script>
-
-			<!-- body -->
-			<h2>Welcome to your project!</h2>
-      <p>
-				<span class="lift:helloWorld.howdy">
-					Welcome to your Lift-- app at <span id="times">Time goes here</span>
-				</span>
-      </p>
-
-			<span class="lift:climageSearch.controls">
-				<!--<span id="routeList"/>-->
-				<select id="routeSelector"></select>
-
-				<canvas width="300" height="200" id="canvas"></canvas>
-				<input type="text" id="routeName"/>
-				<input type="submit" onclick="post()" value="send"/>
-				<input type="submit" onclick="get()" value="receive"/>
-				<div id="output"></div>
-			</span>
-		</div>
-  </body>
+    <!--</span>-->
+</div>
+</body>
 </html>
 
