@@ -1,21 +1,26 @@
-ssh -L9160:localhost:9160 amazon
+JETTY
+JAVA_OPTIONS+=("-Dorg.eclipse.jetty.server.Request.maxFormContentSize=400000")
+    <Call name="setAttribute">
+        <Arg>org.eclipse.jetty.server.Request.maxFormContentSize</Arg>
+        <Arg>400000</Arg>
+    </Call>
+- posting base64 image which will breach the default 200k limit
 
+
+CASSANDRA
+ssh -L9160:localhost:9160 amazon
 cassie version - (core,hadoop,..): 0.19.0
 finagle version - core:1.11.0,
 Cassandra data model
 --------------------
 keyspace: CLIMAGE
 column family: Routes (
-
-
-
 init
 ----
 assume Routes keys as utf8;
 assume Routes comparator as utf8;
 assume Routes validator as utf8;
 get Routes['7'];
-
 assume Images keys as utf8;
 assume Images comparator as utf8;
 assume Images validator as utf8;
