@@ -56,15 +56,17 @@ object RouteDAO extends Logging {
 	val routes = climage.columnFamily("Routes", Utf8Codec, Utf8Codec, Utf8Codec)
 	val images = climage.columnFamily("Images", Utf8Codec, Utf8Codec, Utf8Codec)
 
-	def insertRoute( name:String, routePointsX:String, routePointsY:String, image:String ) = {
-		log.debug("inserting route...")
+	def insertRoute( name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) = {
 		val nextRouteKey = RouteData.routeSeqId.getAndIncrement.toString
 		val nextImageKey = RouteData.imageSeqId.getAndIncrement.toString
+		log.debug("inserting route... "+nextRouteKey+"_"+name+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_"+nextImageKey)
 		val routeBatch = routes.batch()
 		routeBatch.insert(nextRouteKey, Column("id", nextRouteKey))
 		routeBatch.insert(nextRouteKey, Column("name", name))
 		routeBatch.insert(nextRouteKey, Column("routePointsX", routePointsX))
 		routeBatch.insert(nextRouteKey, Column("routePointsY", routePointsY))
+		routeBatch.insert(nextRouteKey, Column("latitude", latitude))
+		routeBatch.insert(nextRouteKey, Column("longitude", longitude))
 		routeBatch.insert(nextRouteKey, Column("imageId", nextImageKey))
 		routeBatch.execute() ensure {
 			log.debug("---------------- route added")
@@ -87,6 +89,8 @@ object RouteDAO extends Logging {
 			("name" -> route.get("name").value) ~
 			("routePointsX" -> route.get("routePointsX").value) ~
 			("routePointsY" -> route.get("routePointsY").value) ~
+			("latitude" -> route.get("latitude").value) ~
+			("longitude" -> route.get("longitude").value) ~
 			("image" -> image.get("image").value)
 	}
 

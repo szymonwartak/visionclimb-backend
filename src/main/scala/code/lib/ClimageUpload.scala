@@ -24,6 +24,8 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("name") openOr "a route",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
+				req.param("latitude") openOr "0",
+				req.param("longitude") openOr "0",
 				req.param("image") openOr ""
 			)
 			JInt(9999)
