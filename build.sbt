@@ -33,7 +33,8 @@ libraryDependencies ++= {
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile" excludeAll(ExclusionRule(organization = "org.slf4j")),
     "net.liftweb" %% "lift-mapper" % liftVersion % "compile" excludeAll(ExclusionRule(organization = "org.slf4j")),
     "org.mortbay.jetty" % "jetty" % "6.1.26" % "test" excludeAll(ExclusionRule(organization = "org.slf4j")),
-    "junit" % "junit" % "4.7" % "test" excludeAll(ExclusionRule(organization = "org.slf4j")),
+    //"junit" % "junit" % "4.7" % "test" excludeAll(ExclusionRule(organization = "org.slf4j")),
+    "org.scalatest" %% "scalatest" % "1.8" % "test" excludeAll(ExclusionRule(organization = "org.slf4j")),
     "ch.qos.logback" % "logback-core" % "1.0.6" exclude("org.slf4j","slf4j-jdk14"),
     "ch.qos.logback" % "logback-classic" % "1.0.6" exclude("org.slf4j","slf4j-jdk14")
   )

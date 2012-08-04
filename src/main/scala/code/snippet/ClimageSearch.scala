@@ -37,13 +37,13 @@ class ClimageSearch extends Logging {
 		Run("alert('loading...'")
 	}
 
-	def controls(xhtml: NodeSeq): NodeSeq = {
-		SHtml.ajaxForm(
-			bind("search", xhtml,
-				"routeList" -> SHtml.ajaxSelect(RouteData.allRoutes.map(r => (r.toString(), r.toString())),
-					Full(""), loadRoute _),
-				"test" -> Text("test")
-			))
-	}
+//	def controls(xhtml: NodeSeq): NodeSeq = {
+//		SHtml.ajaxForm(
+//			bind("search", xhtml,
+//				"routeList" -> SHtml.ajaxSelect(RouteData.allRoutes.map(r => (r.toString(), r.toString())),
+//					Full(""), loadRoute _),
+//				"test" -> Text("test")
+//			))
+//	}
 }
 

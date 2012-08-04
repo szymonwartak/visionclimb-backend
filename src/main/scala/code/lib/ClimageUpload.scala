@@ -12,15 +12,21 @@ import code.util.Logging
 object ClimageUpload extends RestHelper with Logging {
 	serve( "api" / "route" prefix {
 		case "get" :: AsLong(id) :: _ JsonGet _ => {
-			log.debug("getting data.....")
-			RouteDAO.getByRouteId(id)
+			log.debug("getting route.....")
+			RouteDAO.getByRouteId(id.toString)
 		}
-		case "getRoutes" :: _ JsonGet _ => {
-			log.debug("getting all route names....."+RouteData.allRoutes.toString())
-			JArray(RouteData.allRoutes)
+		case "getAreas" :: _ JsonGet _ => {
+			val areas = RouteDAO.getAreas()
+			log.debug("getting all area names....."+areas)
+			JArray(areas)
+		}
+		case "getAreaRoutes" :: AsLong(id) :: _ JsonGet _ => {
+			log.debug("getting area routes.....")
+			JArray(RouteDAO.getAreaRoutes(id.toString))
 		}
 		case "postworks" :: _ Post req => {
 			RouteDAO.insertRoute(
+				req.param("areaId") openOr "",
 				req.param("name") openOr "a route",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
@@ -35,6 +41,5 @@ object ClimageUpload extends RestHelper with Logging {
 			Full(JsonResponse("fail"))
 		}
 	})
-
 }
 
