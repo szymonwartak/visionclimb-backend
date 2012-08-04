@@ -44,15 +44,17 @@ object RouteDAO extends Logging {
 	}
 
 	def getAreaRoutes( areaId:String ) : List[JObject] = {
-		val routeSet = new util.HashSet[String]()
-		(1 to routeCounters.getColumn(areaId,"count").get().get.value.toInt).foldLeft(routeSet){
+		val idSet = new util.HashSet[String]()
+		(1 to routeCounters.getColumn(areaId,"count").get().get.value.toInt).foldLeft(idSet){
 			(set,x) => set.add(x.toString()); set
 		}
-		log.debug("getting area:"+areaId+" routes:"+routeSet)
+		log.debug("getting area:"+areaId+" idSet:"+idSet)
+		val routeSet = new util.HashSet[String]()
+		areas.getColumns(areaId, idSet).get().foldLeft(routeSet) {
+			(set,x) => set.add(x._2.value); set
+		}
 		val json = routes.multigetColumns(routeSet, Route.areaColumnSet).get() map {
-			route => {
-				JsonUtils.getJsonFromQueryResult(route._2.values())
-			}
+			route => { JsonUtils.getJsonFromQueryResult(route._2.values()) }
 		}
 		json.toList
 	}
