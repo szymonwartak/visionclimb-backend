@@ -3,7 +3,7 @@ package code.model.entity
 object Area {
 
 	val columnSet = new java.util.HashSet[String] {
-		add("id");
+		add("areaId");
 		add("latitude");
 		add("longitude");
 		add("name");

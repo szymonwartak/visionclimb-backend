@@ -2,27 +2,27 @@ package code.model.entity
 
 object Route {
 	val columnSet = new java.util.HashSet[String] {
-		add("id"); add("name")
+		add("routeId"); add("name")
 	}
 	val fullColumnSet = new java.util.HashSet[String] {
-		add("id");
+		add("routeId");
 		add("name");
 		add("routePointsX");
 		add("routePointsY");
 		add("latitude");
 		add("longitude");
-		add("imageId")
+		add("imageId");
 	}
 	val areaColumnSet = new java.util.HashSet[String] {
-		add("id");
+		add("routeId");
 		add("name");
 		add("latitude");
 		add("longitude");
+		add("imageId");
 	}
 	val imageColumnSet = new java.util.HashSet[String] {
-		add("id"); add("image")
+		add("imageId"); add("image")
 	}
-
 }
 
 class Route() {

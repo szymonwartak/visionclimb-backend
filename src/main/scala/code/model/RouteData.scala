@@ -18,6 +18,8 @@ object RouteData extends Logging {
 }
 
 object RouteDAO extends Logging {
+	val BLANK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oMCRUiMrIBQVkAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAADElEQVQI12NgoC4AAABQAAEiE+h1AAAAAElFTkSuQmCC"
+
 	val climage = new Cluster(Set("localhost"), 9160, NullStatsReceiver).keyspace("CLIMAGE").connect()
 	val routes = climage.columnFamily("Routes", Utf8Codec, Utf8Codec, Utf8Codec)
 	val images = climage.columnFamily("Images", Utf8Codec, Utf8Codec, Utf8Codec)
@@ -43,6 +45,10 @@ object RouteDAO extends Logging {
 		return returning
 	}
 
+	/**
+	 * @return List of routes in the area.
+	 *         note: No grouping happening on the back end (e.g., by imageId)
+	 */
 	def getAreaRoutes( areaId:String ) : List[JObject] = {
 		val idSet = new util.HashSet[String]()
 		(1 to routeCounters.getColumn(areaId,"count").get().get.value.toInt).foldLeft(idSet){
@@ -59,12 +65,22 @@ object RouteDAO extends Logging {
 		json.toList
 	}
 
-	def getByRouteId( id:String ) : JObject = {
+	def getRoutes( ids:List[String] ) : List[JObject] = {
+		routes.multigetColumns(setAsJavaSet(ids.toSet), Route.fullColumnSet).get() map {
+			route => JsonUtils.getJsonFromQueryResult(route._2.values())
+		} toList
+	}
+
+	def getImage( id:String ) : JObject = {
+		JsonUtils.getJsonFromQueryResult(images.getColumns(id, Route.imageColumnSet).get().values())
+	}
+
+	def getRoute( id:String ) : JObject = {
 		log.debug("getting route by id..."+id)
 		val route = routes.getColumns(id, Route.fullColumnSet).get()
 		log.debug("image id: "+route.get("imageId").value)
 		val image = images.getColumns(route.get("imageId").value, Route.imageColumnSet).get()
-		("id" -> route.get("id").value) ~
+		("routeId" -> route.get("routeId").value) ~
 			("name" -> route.get("name").value) ~
 			("routePointsX" -> route.get("routePointsX").value) ~
 			("routePointsY" -> route.get("routePointsY").value) ~
@@ -92,29 +108,33 @@ object RouteDAO extends Logging {
 		routes.removeRow(routeId)
 	}
 
-	def insertRoute( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) = {
-		val nextRouteKey = getRouteCountGetAndIncrement("routes") //RouteData.routeSeqId.getAndIncrement.toString
-		val nextImageKey = getRouteCountGetAndIncrement("images") //RouteData.imageSeqId.getAndIncrement.toString
-		val nextAreaRouteKey = getRouteCountGetAndIncrement(areaId) //RouteData.imageSeqId.getAndIncrement.toString
-		log.debug("inserting route... "+nextRouteKey+"_"+name+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_"+nextImageKey+"_area:"+areaId+"_"+nextAreaRouteKey)
+	def insertRouteWithImage( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) = {
+		val nextImageKey = getRouteCountGetAndIncrement("images")
+		insertRoute(areaId, name, routePointsX, routePointsY, latitude, longitude, nextImageKey)
+		val imageBatch = images.batch()
+		imageBatch.insert(nextImageKey, Column("imageId", nextImageKey))
+		imageBatch.insert(nextImageKey, Column("image", image))
+		imageBatch.execute() ensure {
+			log.debug("---------------- image added")
+		}
+	}
+
+	def insertRoute( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, imageId:String ) = {
+		val nextRouteKey = getRouteCountGetAndIncrement("routes")
+		val nextAreaRouteKey = getRouteCountGetAndIncrement(areaId)
+		log.debug("inserting route... "+nextRouteKey+"_"+imageId+"_"+nextAreaRouteKey+"_"+name+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_area:"+areaId)
 		val routeBatch = routes.batch()
 		routeBatch.insert(nextRouteKey, Column("areaId", areaId))
 		routeBatch.insert(nextRouteKey, Column("areaRouteId", nextAreaRouteKey))
-		routeBatch.insert(nextRouteKey, Column("id", nextRouteKey))
+		routeBatch.insert(nextRouteKey, Column("routeId", nextRouteKey))
 		routeBatch.insert(nextRouteKey, Column("name", name))
 		routeBatch.insert(nextRouteKey, Column("routePointsX", routePointsX))
 		routeBatch.insert(nextRouteKey, Column("routePointsY", routePointsY))
 		routeBatch.insert(nextRouteKey, Column("latitude", latitude))
 		routeBatch.insert(nextRouteKey, Column("longitude", longitude))
-		routeBatch.insert(nextRouteKey, Column("imageId", nextImageKey))
+		routeBatch.insert(nextRouteKey, Column("imageId", imageId))
 		routeBatch.execute() ensure {
 			log.debug("---------------- route added")
-		}
-		val imageBatch = images.batch()
-		imageBatch.insert(nextImageKey, Column("id", nextImageKey))
-		imageBatch.insert(nextImageKey, Column("image", image))
-		imageBatch.execute() ensure {
-			log.debug("---------------- image added")
 		}
 		areas.insert(areaId, Column(nextAreaRouteKey, nextRouteKey)) ensure {
 			log.debug("---------------- route added to area")
