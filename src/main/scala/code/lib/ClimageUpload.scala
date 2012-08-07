@@ -28,13 +28,14 @@ object ClimageUpload extends RestHelper with Logging {
 		}
 		// route ids will come as a stringified JS array: [1,2,3]
 		case "getRoutesAndImage" :: _ Post req => {
-			log.debug("getting multiple routes....")
-			val routes = RouteDAO.getRoutes("""\d""".r findAllIn (req.param("routeIds") openOr "") map {_.toString} toList)
-			val image = RouteDAO.getImage(req.param("imageId") openOr RouteDAO.BLANK_IMAGE)
+			val routeIds = (req.param("routeIds") openOr "")
+			log.debug("getting multiple routes...."+routeIds)
+			val routes = RouteDAO.getRoutes("""[\d]+""".r findAllIn routeIds map {_.toString} toList)
+			val image = RouteDAO.getImage(req.param("imageId") openOr "0")
 			image ~ ("routes" -> JArray(routes))
 		}
 		case "postRouteWithImage" :: _ Post req => {
-			RouteDAO.insertRouteWithImage(
+			val (routeId, imageId) = RouteDAO.insertRouteWithImage(
 				req.param("areaId") openOr "",
 				req.param("name") openOr "a route",
 				req.param("routePointsX") openOr "[]",
@@ -43,19 +44,20 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("longitude") openOr "0",
 				req.param("image") openOr ""
 			)
-			JInt(99)
+			("routeId" -> routeId) ~ ("imageId" -> imageId)
 		}
 		case "postRoute" :: _ Post req => {
-			RouteDAO.insertRoute(
+			val imageId = req.param("imageId") openOr "0"
+			val routeId = RouteDAO.insertRoute(
 				req.param("areaId") openOr "",
 				req.param("name") openOr "a route",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
 				req.param("latitude") openOr "0",
 				req.param("longitude") openOr "0",
-				req.param("imageId") openOr "0"
+				imageId
 			)
-			JInt(11)
+			("routeId" -> routeId) ~ ("imageId" -> imageId)
 		}
 		case _ => () => {
 			log.debug(S.param("name").toString)

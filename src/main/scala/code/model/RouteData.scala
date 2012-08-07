@@ -72,7 +72,10 @@ object RouteDAO extends Logging {
 	}
 
 	def getImage( id:String ) : JObject = {
-		JsonUtils.getJsonFromQueryResult(images.getColumns(id, Route.imageColumnSet).get().values())
+		if(id=="0")
+			("image" -> RouteDAO.BLANK_IMAGE)
+		else
+			JsonUtils.getJsonFromQueryResult(images.getColumns(id, Route.imageColumnSet).get().values())
 	}
 
 	def getRoute( id:String ) : JObject = {
@@ -108,18 +111,19 @@ object RouteDAO extends Logging {
 		routes.removeRow(routeId)
 	}
 
-	def insertRouteWithImage( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) = {
+	def insertRouteWithImage( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) : (String,String) = {
 		val nextImageKey = getRouteCountGetAndIncrement("images")
-		insertRoute(areaId, name, routePointsX, routePointsY, latitude, longitude, nextImageKey)
+		val nextRouteKey = insertRoute(areaId, name, routePointsX, routePointsY, latitude, longitude, nextImageKey)
 		val imageBatch = images.batch()
 		imageBatch.insert(nextImageKey, Column("imageId", nextImageKey))
 		imageBatch.insert(nextImageKey, Column("image", image))
 		imageBatch.execute() ensure {
 			log.debug("---------------- image added")
 		}
+		(nextRouteKey, nextImageKey)
 	}
 
-	def insertRoute( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, imageId:String ) = {
+	def insertRoute( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, imageId:String ) : String = {
 		val nextRouteKey = getRouteCountGetAndIncrement("routes")
 		val nextAreaRouteKey = getRouteCountGetAndIncrement(areaId)
 		log.debug("inserting route... "+nextRouteKey+"_"+imageId+"_"+nextAreaRouteKey+"_"+name+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_area:"+areaId)
@@ -139,6 +143,7 @@ object RouteDAO extends Logging {
 		areas.insert(areaId, Column(nextAreaRouteKey, nextRouteKey)) ensure {
 			log.debug("---------------- route added to area")
 		}
+		nextRouteKey
 	}
 
 }
