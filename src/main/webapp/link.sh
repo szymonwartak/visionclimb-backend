@@ -15,4 +15,5 @@ ln -fv $TARGET_DIR/js/phonegap.js $SOURCE_DIR/js/phonegap.js
 ln -fv $TARGET_DIR/js/rest.js $SOURCE_DIR/js/rest.js
 ln -fv $TARGET_DIR/js/geo.js $SOURCE_DIR/js/geo.js
 ln -fv $TARGET_DIR/js/todataurl.js $SOURCE_DIR/js/todataurl.js
+ln -fv $TARGET_DIR/js/predef.js $SOURCE_DIR/js/predef.js
 

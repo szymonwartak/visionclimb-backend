@@ -13,10 +13,6 @@ import code.model.entity.Route
 
 object ClimageUpload extends RestHelper with Logging {
 	serve( "api" / "route" prefix {
-		case "get" :: AsLong(routeId) :: _ JsonGet _ => {
-			log.debug("getting route.....")
-			RouteDAO.getRoute(routeId.toString)
-		}
 		case "getAreas" :: _ JsonGet _ => {
 			val areas = RouteDAO.getAreas()
 			log.debug("getting all area names....."+areas)
@@ -38,6 +34,7 @@ object ClimageUpload extends RestHelper with Logging {
 			val (routeId, imageId) = RouteDAO.insertRouteWithImage(
 				req.param("areaId") openOr "",
 				req.param("name") openOr "a route",
+				req.param("grade") openOr "-",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
 				req.param("latitude") openOr "0",
@@ -51,6 +48,7 @@ object ClimageUpload extends RestHelper with Logging {
 			val routeId = RouteDAO.insertRoute(
 				req.param("areaId") openOr "",
 				req.param("name") openOr "a route",
+				req.param("grade") openOr "-",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
 				req.param("latitude") openOr "0",

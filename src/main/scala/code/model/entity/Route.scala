@@ -1,12 +1,10 @@
 package code.model.entity
 
 object Route {
-	val columnSet = new java.util.HashSet[String] {
-		add("routeId"); add("name")
-	}
 	val fullColumnSet = new java.util.HashSet[String] {
 		add("routeId");
 		add("name");
+		add("grade");
 		add("routePointsX");
 		add("routePointsY");
 		add("latitude");
@@ -16,6 +14,7 @@ object Route {
 	val areaColumnSet = new java.util.HashSet[String] {
 		add("routeId");
 		add("name");
+		add("grade");
 		add("latitude");
 		add("longitude");
 		add("imageId");

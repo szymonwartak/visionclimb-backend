@@ -78,21 +78,6 @@ object RouteDAO extends Logging {
 			JsonUtils.getJsonFromQueryResult(images.getColumns(id, Route.imageColumnSet).get().values())
 	}
 
-	def getRoute( id:String ) : JObject = {
-		log.debug("getting route by id..."+id)
-		val route = routes.getColumns(id, Route.fullColumnSet).get()
-		log.debug("image id: "+route.get("imageId").value)
-		val image = images.getColumns(route.get("imageId").value, Route.imageColumnSet).get()
-		("routeId" -> route.get("routeId").value) ~
-			("name" -> route.get("name").value) ~
-			("routePointsX" -> route.get("routePointsX").value) ~
-			("routePointsY" -> route.get("routePointsY").value) ~
-			("latitude" -> route.get("latitude").value) ~
-			("longitude" -> route.get("longitude").value) ~
-			("image" -> image.get("image").value)
-	}
-
-
 	def getRouteCount( areaId:String ) : Long = {
 		val count = routeCounters.getColumn(areaId,"count").get()
 		count.get.value
@@ -111,9 +96,9 @@ object RouteDAO extends Logging {
 		routes.removeRow(routeId)
 	}
 
-	def insertRouteWithImage( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) : (String,String) = {
+	def insertRouteWithImage( areaId:String, name:String, grade:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, image:String ) : (String,String) = {
 		val nextImageKey = getRouteCountGetAndIncrement("images")
-		val nextRouteKey = insertRoute(areaId, name, routePointsX, routePointsY, latitude, longitude, nextImageKey)
+		val nextRouteKey = insertRoute(areaId, name, grade, routePointsX, routePointsY, latitude, longitude, nextImageKey)
 		val imageBatch = images.batch()
 		imageBatch.insert(nextImageKey, Column("imageId", nextImageKey))
 		imageBatch.insert(nextImageKey, Column("image", image))
@@ -123,15 +108,16 @@ object RouteDAO extends Logging {
 		(nextRouteKey, nextImageKey)
 	}
 
-	def insertRoute( areaId:String, name:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, imageId:String ) : String = {
+	def insertRoute( areaId:String, name:String, grade:String, routePointsX:String, routePointsY:String, latitude:String, longitude:String, imageId:String ) : String = {
 		val nextRouteKey = getRouteCountGetAndIncrement("routes")
 		val nextAreaRouteKey = getRouteCountGetAndIncrement(areaId)
-		log.debug("inserting route... "+nextRouteKey+"_"+imageId+"_"+nextAreaRouteKey+"_"+name+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_area:"+areaId)
+		log.debug("inserting route... "+nextRouteKey+"_"+imageId+"_"+nextAreaRouteKey+"_"+name+"_"+grade+"_"+routePointsX+"_"+routePointsY+"_"+latitude+"_"+longitude+"_area:"+areaId)
 		val routeBatch = routes.batch()
 		routeBatch.insert(nextRouteKey, Column("areaId", areaId))
 		routeBatch.insert(nextRouteKey, Column("areaRouteId", nextAreaRouteKey))
 		routeBatch.insert(nextRouteKey, Column("routeId", nextRouteKey))
 		routeBatch.insert(nextRouteKey, Column("name", name))
+		routeBatch.insert(nextRouteKey, Column("grade", grade))
 		routeBatch.insert(nextRouteKey, Column("routePointsX", routePointsX))
 		routeBatch.insert(nextRouteKey, Column("routePointsY", routePointsY))
 		routeBatch.insert(nextRouteKey, Column("latitude", latitude))
