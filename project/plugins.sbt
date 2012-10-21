@@ -8,4 +8,4 @@ case x if (x.startsWith("0.12")) => "com.github.siasia" %% "xsbt-web-plugin" % "
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.6.0")
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0" excludeAll(ExclusionRule(organization = "org.slf4j")))
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.1.0")
