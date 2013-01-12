@@ -25,7 +25,7 @@ finagle version - core:1.11.0,
 Cassandra data model
 --------------------
 keyspace: CLIMAGE
-column family: Routes (
+column family: Routes
 init
 ----
 drop column family RouteCounters;
@@ -49,10 +49,14 @@ incr RouteCounters['routes']['count'];
 decr RouteCounters['routes']['count'];
 incr RouteCounters['images']['count'];
 decr RouteCounters['images']['count'];
-incr RouteCounters['1']['count'];
-decr RouteCounters['1']['count'];
-incr RouteCounters['2']['count'];
-decr RouteCounters['2']['count'];
+incr RouteCounters['area0']['count'];
+decr RouteCounters['area0']['count'];
+incr RouteCounters['area1']['count'];
+decr RouteCounters['area1']['count'];
+incr RouteCounters['areas']['count'];
+decr RouteCounters['areas']['count'];
+incr RouteCounters['areaNames']['count'];
+incr RouteCounters['areaNames']['count'];
 
 
 // route counters (CF; all route counter - for id; area route counter - for list;)
@@ -64,13 +68,14 @@ incr RouteCounters[{areaId}]['count'];
 
 
 
+
 DATA
 ====
-set areas['1']['areaId']='1';
-set areas['1']['name']='london';
-set areas['1']['latitude']='53';
-set areas['1']['longitude']='0';
-set areas['2']['areaId']='2';
-set areas['2']['name']='birmingham';
-set areas['2']['latitude']='54';
-set areas['2']['longitude']='-1';
+set areas['area1']['areaId']='area1';
+set areas['area1']['name']='london';
+set areas['area1']['latitude']='53';
+set areas['area1']['longitude']='0';
+set areas['area2']['areaId']='area2';
+set areas['area2']['name']='birmingham';
+set areas['area2']['latitude']='54';
+set areas['area2']['longitude']='-1';

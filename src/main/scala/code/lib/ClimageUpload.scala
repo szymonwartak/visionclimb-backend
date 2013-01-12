@@ -10,6 +10,7 @@ import util.BasicTypesHelpers.AsLong
 import code.model.{RouteDAO, RouteData}
 import code.util.Logging
 import code.model.entity.Route
+import scala.None
 
 object ClimageUpload extends RestHelper with Logging {
 	serve( "api" / "route" prefix {
@@ -17,6 +18,14 @@ object ClimageUpload extends RestHelper with Logging {
 			val areas = RouteDAO.getAreas()
 			log.debug("getting all area names....."+areas)
 			JArray(areas)
+		}
+		case "postArea" :: _ Post req => {
+			val areaName = RouteDAO.insertArea(
+				req.param("name") openOr "",
+				req.param("latitude") openOr "0",
+				req.param("longitude") openOr "0"
+			)
+			("status" -> "ok") ~ ("areaName" -> areaName)
 		}
 		case "getAreaRoutes" :: AsLong(areaId) :: _ JsonGet _ => {
 			log.debug("getting area routes.....")

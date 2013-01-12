@@ -13,6 +13,7 @@ ln -sfv $TARGET_DIR/js/climage.js $SOURCE_DIR/js/climage.js
 ln -sfv $TARGET_DIR/js/jquery.mobile.js $SOURCE_DIR/js/jquery.mobile.js
 ln -sfv $TARGET_DIR/js/phonegap.js $SOURCE_DIR/js/phonegap.js
 ln -sfv $TARGET_DIR/js/rest.js $SOURCE_DIR/js/rest.js
+ln -sfv $TARGET_DIR/js/data.js $SOURCE_DIR/js/data.js
 ln -sfv $TARGET_DIR/js/geo.js $SOURCE_DIR/js/geo.js
 ln -sfv $TARGET_DIR/js/todataurl.js $SOURCE_DIR/js/todataurl.js
 ln -sfv $TARGET_DIR/js/predef.js $SOURCE_DIR/js/predef.js
