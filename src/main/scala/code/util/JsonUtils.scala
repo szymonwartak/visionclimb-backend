@@ -11,8 +11,7 @@ import scala.collection.JavaConversions._
 object JsonUtils {
 
 	def getJsonFromQueryResult( result:Collection[Column[String,String]]) : JObject = {
-		val json = JObject(Nil)
-		result.foldLeft(json){
+		result.foldLeft(JObject(Nil)){
 			(list,x) => list ~ (x.name -> x.value)
 		}
 	}

@@ -27,44 +27,39 @@ object ClimageUpload extends RestHelper with Logging {
 			)
 			("status" -> "ok") ~ ("areaName" -> areaName)
 		}
-		case "getAreaRoutes" :: AsLong(areaId) :: _ JsonGet _ => {
-			log.debug("getting area routes.....")
-			JArray(RouteDAO.getAreaRoutes(areaId.toString))
+		case "getAreaClimages" :: AsLong(areaId) :: _ JsonGet _ => {
+			log.debug("getting area climages.....%s".format(areaId))
+			JArray(RouteDAO.getAreaClimages(areaId.toString))
 		}
 		// route ids will come as a stringified JS array: [1,2,3]
-		case "getRoutesAndImage" :: _ Post req => {
-			val routeIds = (req.param("routeIds") openOr "")
-			log.debug("getting multiple routes...."+routeIds)
-			val routes = RouteDAO.getRoutes("""[\d]+""".r findAllIn routeIds map {_.toString} toList)
-			val image = RouteDAO.getImage(req.param("imageId") openOr "0")
-			image ~ ("routes" -> JArray(routes))
+		case "getClimage" :: climageId :: _ JsonGet _ => {
+			log.debug("getting climage.....%s".format(climageId))
+			RouteDAO.getClimage(climageId.toString)
 		}
 		case "postRouteWithImage" :: _ Post req => {
-			val (routeId, imageId) = RouteDAO.insertRouteWithImage(
+			val (routeId, climageId) = RouteDAO.insertRouteWithImage(
 				req.param("areaId") openOr "",
-				req.param("name") openOr "a route",
+				req.param("routeName") openOr "a route",
 				req.param("grade") openOr "-",
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]",
+				req.param("imageName") openOr "an image",
 				req.param("latitude") openOr "0",
 				req.param("longitude") openOr "0",
-				req.param("image") openOr ""
+				req.param("imageData") openOr ""
 			)
-			("routeId" -> routeId) ~ ("imageId" -> imageId)
+			("routeId" -> routeId) ~ ("climageId" -> climageId)
 		}
 		case "postRoute" :: _ Post req => {
-			val imageId = req.param("imageId") openOr "0"
+			val climageId = req.param("climageId") openOr "0"
 			val routeId = RouteDAO.insertRoute(
-				req.param("areaId") openOr "",
-				req.param("name") openOr "a route",
+				climageId,
+				req.param("routeName") openOr "a route",
 				req.param("grade") openOr "-",
 				req.param("routePointsX") openOr "[]",
-				req.param("routePointsY") openOr "[]",
-				req.param("latitude") openOr "0",
-				req.param("longitude") openOr "0",
-				imageId
+				req.param("routePointsY") openOr "[]"
 			)
-			("routeId" -> routeId) ~ ("imageId" -> imageId)
+			("routeId" -> routeId) ~ ("climageId" -> climageId)
 		}
 		case _ => () => {
 			log.debug(S.param("name").toString)

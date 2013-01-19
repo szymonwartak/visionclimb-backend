@@ -13,10 +13,12 @@ from mobile app, start auto-reload for browser-based running: ~;container:start;
 
 Data Model
 ----------
-Areas: id, name, latitude, longitude, i1, i2... r1, r2...
-Routes: ...
-Images:
-
+Areas: areaId, name, latitude, longitude
+Climages: climageId, name, latitude, longitude, imageData
+Routes: routeId, grade, name, routePointsX/Y
+// climages/routes are implicit by the id format below + counters
+// climageId = areaId_{counter}
+// routeId = imageId_{counter}
 
 CASSANDRA
 ssh -L9160:localhost:9160 amazon
@@ -28,42 +30,41 @@ keyspace: CLIMAGE
 column family: Routes
 init
 ----
-drop column family RouteCounters;
+drop column family Counters;
 drop column family Areas;
+drop column family Climages;
 drop column family Routes;
-drop column family Images;
-CREATE COLUMN FAMILY RouteCounters WITH default_validation_class=CounterColumnType and comparator = UTF8Type AND key_validation_class=UTF8Type;
+create column family Counters WITH default_validation_class=CounterColumnType and comparator = UTF8Type AND key_validation_class=UTF8Type;
 create column family Routes;
 create column family Areas;
-create column family Images;
+create column family Climages;
 assume Routes keys as utf8;
 assume Routes comparator as utf8;
 assume Routes validator as utf8;
-assume Images keys as utf8;
-assume Images comparator as utf8;
-assume Images validator as utf8;
+assume Climages keys as utf8;
+assume Climages comparator as utf8;
+assume Climages validator as utf8;
 assume Areas keys as utf8;
 assume Areas comparator as utf8;
 assume Areas validator as utf8;
-incr RouteCounters['routes']['count'];
-decr RouteCounters['routes']['count'];
-incr RouteCounters['images']['count'];
-decr RouteCounters['images']['count'];
-incr RouteCounters['area0']['count'];
-decr RouteCounters['area0']['count'];
-incr RouteCounters['area1']['count'];
-decr RouteCounters['area1']['count'];
-incr RouteCounters['areas']['count'];
-decr RouteCounters['areas']['count'];
-incr RouteCounters['areaNames']['count'];
-incr RouteCounters['areaNames']['count'];
+incr Counters['meta']['area'];
+decr Counters['meta']['area'];
+incr Counters['meta']['climage'];
+decr Counters['meta']['climage'];
+incr Counters['meta']['route'];
+decr Counters['meta']['route'];
 
+// CLEAR
+truncate Areas;
+truncate Counters;
+truncate Climages;
+truncate Routes;
 
 // route counters (CF; all route counter - for id; area route counter - for list;)
-drop column family RouteCounters;
-CREATE COLUMN FAMILY RouteCounters WITH default_validation_class=CounterColumnType and comparator = UTF8Type AND key_validation_class=UTF8Type;
-incr RouteCounters['routes']['count'];
-incr RouteCounters[{areaId}]['count'];
+drop column family Counters;
+CREATE COLUMN FAMILY Counters WITH default_validation_class=CounterColumnType and comparator = UTF8Type AND key_validation_class=UTF8Type;
+incr Counters['routes']['count'];
+incr Counters[{areaId}]['count'];
 
 
 
