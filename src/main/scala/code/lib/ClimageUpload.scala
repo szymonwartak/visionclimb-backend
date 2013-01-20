@@ -20,12 +20,12 @@ object ClimageUpload extends RestHelper with Logging {
 			JArray(areas)
 		}
 		case "postArea" :: _ Post req => {
-			val areaName = RouteDAO.insertArea(
+			val areaId = RouteDAO.insertArea(
 				req.param("name") openOr "",
 				req.param("latitude") openOr "0",
 				req.param("longitude") openOr "0"
 			)
-			("status" -> "ok") ~ ("areaName" -> areaName)
+			("areaId" -> areaId) ~ Map()
 		}
 		case "getAreaClimages" :: AsLong(areaId) :: _ JsonGet _ => {
 			log.debug("getting area climages.....%s".format(areaId))

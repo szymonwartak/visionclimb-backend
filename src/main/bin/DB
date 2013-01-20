@@ -59,6 +59,12 @@ truncate Areas;
 truncate Counters;
 truncate Climages;
 truncate Routes;
+incr Counters['meta']['area'];
+decr Counters['meta']['area'];
+incr Counters['meta']['climage'];
+decr Counters['meta']['climage'];
+incr Counters['meta']['route'];
+decr Counters['meta']['route'];
 
 // route counters (CF; all route counter - for id; area route counter - for list;)
 drop column family Counters;
