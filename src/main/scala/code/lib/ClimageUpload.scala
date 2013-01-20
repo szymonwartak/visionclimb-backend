@@ -25,7 +25,7 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("latitude") openOr "0",
 				req.param("longitude") openOr "0"
 			)
-			("areaId" -> areaId) ~ Map()
+			("areaId" -> areaId) ~ List()
 		}
 		case "getAreaClimages" :: AsLong(areaId) :: _ JsonGet _ => {
 			log.debug("getting area climages.....%s".format(areaId))

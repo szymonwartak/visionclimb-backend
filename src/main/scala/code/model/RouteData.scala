@@ -67,7 +67,7 @@ object RouteDAO extends Logging {
 		imageBatch.insert(nextImageKey, Column("latitude", latitude))
 		imageBatch.insert(nextImageKey, Column("longitude", longitude))
 		imageBatch.insert(nextImageKey, Column("imageData",
-			(if (image.length()>=10 && image.substring(0,10)=="data:image") BLANK_IMAGE else image)))
+			(if (image.length()>=10 && image.substring(0,10)=="data:image") image else BLANK_IMAGE)))
 		imageBatch.execute()
 			.onSuccess(value => log.debug("---------------- image added! %s".format(nextImageKey)))
 			.onFailure(value => log.error("---------------- image add FAILED! %s".format(nextImageKey)))
