@@ -17,4 +17,5 @@ ln -sfv $TARGET_DIR/js/data.js $SOURCE_DIR/js/data.js
 ln -sfv $TARGET_DIR/js/geo.js $SOURCE_DIR/js/geo.js
 ln -sfv $TARGET_DIR/js/todataurl.js $SOURCE_DIR/js/todataurl.js
 ln -sfv $TARGET_DIR/js/predef.js $SOURCE_DIR/js/predef.js
+ln -sfv $TARGET_DIR/js/log4javascript.js $SOURCE_DIR/js/log4javascript.js
 

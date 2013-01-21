@@ -4,9 +4,7 @@ import collection.mutable.ListBuffer
 import com.twitter.cassie.codecs.Utf8Codec
 import com.twitter.finagle.stats.NullStatsReceiver
 import entity.{Climage, Area, Route}
-import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.cassie.{CounterColumn, Column, Cluster}
-import net.liftweb.json.JsonAST.{JString, JValue}
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 import code.util.{JsonUtils, Logging}
@@ -52,8 +50,8 @@ object RouteDAO extends Logging {
 		areaBatch.insert(nextAreaKey, Column("latitude", latitude))
 		areaBatch.insert(nextAreaKey, Column("longitude", longitude))
 		areaBatch.execute()
-			.onSuccess(value => log.debug("---------------- area added! %s".format(value)))
-			.onFailure(value => log.error("---------------- area add FAILED! %s".format(value)))
+			.onSuccess(value => log.debug("DB\tSUCCESS\tinsertArea\t%s\t%s".format(nextAreaKey, value)))
+			.onFailure(value => log.error("DB\tFAIL\tinsertArea\t%s\t%s".format(nextAreaKey, value)))
 		nextAreaKey
 	}
 
@@ -69,23 +67,22 @@ object RouteDAO extends Logging {
 		imageBatch.insert(nextImageKey, Column("imageData",
 			(if (image.length()>=10 && image.substring(0,10)=="data:image") image else BLANK_IMAGE)))
 		imageBatch.execute()
-			.onSuccess(value => log.debug("---------------- image added! %s".format(nextImageKey)))
-			.onFailure(value => log.error("---------------- image add FAILED! %s".format(nextImageKey)))
+			.onSuccess(value => log.debug("DB\tSUCCESS\tinsertRouteWithImage\t%s\t%s".format(Map("image"->nextImageKey,"route"->nextRouteKey), value)))
+			.onFailure(value => log.error("DB\tFAIL\tinsertRouteWithImage\t%s\t%s".format(Map("image"->nextImageKey,"route"->nextRouteKey), value)))
 		(nextRouteKey, nextImageKey)
 	}
 
 	def insertRoute( climageId:String, name:String, grade:String, routePointsX:String, routePointsY:String ) : String = {
 		val nextRouteKey = "%s_%s".format(climageId, incrementCountAndGet("route", climageId))
-		log.debug("inserting route... "+nextRouteKey+"_"+name+"_"+grade+"_"+routePointsX+"_"+routePointsY)
 		val routeBatch = routes.batch()
 		routeBatch.insert(nextRouteKey, Column("routeId", nextRouteKey))
 		routeBatch.insert(nextRouteKey, Column("name", name))
 		routeBatch.insert(nextRouteKey, Column("grade", grade))
 		routeBatch.insert(nextRouteKey, Column("routePointsX", routePointsX))
 		routeBatch.insert(nextRouteKey, Column("routePointsY", routePointsY))
-		routeBatch.execute() ensure {
-			log.debug("---------------- route added: %s".format(nextRouteKey))
-		}
+		routeBatch.execute()
+			.onSuccess(value => log.debug("DB\tSUCCESS\tinsertRoute\t%s\t%s".format(nextRouteKey, value)))
+			.onFailure(value => log.error("DB\tFAIL\tinsertRoute\t%s\t%s".format(nextRouteKey, value)))
 		nextRouteKey
 	}
 
@@ -93,12 +90,10 @@ object RouteDAO extends Logging {
 		val allAreasBuffer = new ListBuffer[JObject]
 		areas.rowsIteratee(100, Area.columnSet).foreach {
 			case(key, columns) => {
-				log.debug("columns: "+ToJson(columns))
 				allAreasBuffer += ToJson(columns)
 			}
 		}.get()
-
-		log.debug("les areas: "+allAreasBuffer.toList.toString())
+		log.debug("DB\tGET\tgetAreas\t%s".format(allAreasBuffer.map(area=>area.values("areaId"))))
 		return allAreasBuffer.toList
 	}
 
@@ -107,37 +102,32 @@ object RouteDAO extends Logging {
 			.foldLeft(Set[String]()) ((set,x) =>
 				set + "%s_%s".format(areaId, x)
 			)
-		log.debug("getting area:"+areaId+" idSet:"+idSet)
-		climages.multigetColumns(idSet, Climage.columnSet).get() map {
+		val result = climages.multigetColumns(idSet, Climage.columnSet).get() map {
 			climage => { ToJson(climage._2.values()) }
-		} toList
+		}
+		log.debug("DB\tGET\tgetAreaClimages\t%s".format(idSet))
+		result.toList
 	}
 
 	def getClimage( climageId:String ) : JObject = {
-		log.debug("getting climage: %s".format(climageId))
 		val routeIdSet = (1 to counters.getColumn("route", climageId).get().get.value.toInt)
 			.foldLeft(Set[String]()) ((set,x) =>
 				set + "%s_%s".format(climageId, x)
 			)
 		val jsonRoutes = getRoutes(routeIdSet)
 		val jsonClimage = ToJson(climages.getColumns(climageId, Climage.fullColumnSet).get().values())
+		log.debug("DB\tGET\tgetClimage\t%s".format(climageId))
 		jsonClimage ~ ("routes" -> jsonRoutes)
 	}
 
 	def getRoutes( idSet:Set[String] ) : List[JObject] = {
-		log.debug("getting routes:"+idSet)
-		routes.multigetColumns(idSet, Route.fullColumnSet).get() map {
+		val result = routes.multigetColumns(idSet, Route.fullColumnSet).get() map {
 			route => { ToJson(route._2.values()) }
-		} toList
+		}
+		log.debug("DB\tGET\tgetRoutes\t%s".format(idSet))
+		result.toList
 	}
 
-//	def getImage( id:String ) : JObject = {
-//		if(id=="0")
-//			("image" -> RouteDAO.BLANK_IMAGE)
-//		else
-//			ToJson(climages.getColumns(id, Climage.imageColumnSet).get().values())
-//	}
-//
 //	def deleteRoute( routeId:String ) = {
 //		val route = routes.getColumns(routeId, Route.fullColumnSet).get()
 //		areas.removeColumn(route.get("areaId").value, route.get("areaRouteId").value)

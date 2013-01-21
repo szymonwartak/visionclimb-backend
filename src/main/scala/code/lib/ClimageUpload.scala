@@ -14,9 +14,13 @@ import scala.None
 
 object ClimageUpload extends RestHelper with Logging {
 	serve( "api" / "route" prefix {
-		case "getAreas" :: _ JsonGet _ => {
+		case "log" :: userId :: _ Post req => {
+			log.debug("CLIENT\t%s\t%s\t%s".format(userId, req.param("url") openOr "", req.param("message") openOr ""))
+			JString("ok")
+		}
+		case "getAreas" :: userId :: _ JsonGet _ => {
 			val areas = RouteDAO.getAreas()
-			log.debug("getting all area names....."+areas)
+			log.debug("SERVER\tgetAreas\t%s".format(areas))
 			JArray(areas)
 		}
 		case "postArea" :: _ Post req => {
@@ -25,15 +29,16 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("latitude") openOr "0",
 				req.param("longitude") openOr "0"
 			)
+			log.debug("SERVER\t%s\tpostArea\t%s\t%s".format(req.param("userId") openOr "ANON", req.params, areaId))
 			("areaId" -> areaId) ~ List()
 		}
-		case "getAreaClimages" :: AsLong(areaId) :: _ JsonGet _ => {
-			log.debug("getting area climages.....%s".format(areaId))
+		case "getAreaClimages" :: AsLong(areaId) :: userId :: _ JsonGet _ => {
+			log.debug("SERVER\tgetAreaClimages\t%s".format(areaId))
 			JArray(RouteDAO.getAreaClimages(areaId.toString))
 		}
 		// route ids will come as a stringified JS array: [1,2,3]
-		case "getClimage" :: climageId :: _ JsonGet _ => {
-			log.debug("getting climage.....%s".format(climageId))
+		case "getClimage" :: climageId :: userId :: _ JsonGet _ => {
+			log.debug("SERVER\tgetClimage\t%s".format(climageId))
 			RouteDAO.getClimage(climageId.toString)
 		}
 		case "postRouteWithImage" :: _ Post req => {
@@ -48,6 +53,7 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("longitude") openOr "0",
 				req.param("imageData") openOr ""
 			)
+			log.debug("SERVER\t%s\tpostRouteWithImage\t%s\t%s".format(req.param("userId") openOr "ANON", req.params.filter(_._1!="imageData"), ("routeId" -> routeId) ~ ("climageId" -> climageId)))
 			("routeId" -> routeId) ~ ("climageId" -> climageId)
 		}
 		case "postRoute" :: _ Post req => {
@@ -59,10 +65,11 @@ object ClimageUpload extends RestHelper with Logging {
 				req.param("routePointsX") openOr "[]",
 				req.param("routePointsY") openOr "[]"
 			)
+			log.debug("SERVER\t%s\tpostRoute\t%s\t%s".format(req.param("userId") openOr "ANON", req.params, ("routeId" -> routeId) ~ ("climageId" -> climageId)))
 			("routeId" -> routeId) ~ ("climageId" -> climageId)
 		}
 		case _ => () => {
-			log.debug(S.param("name").toString)
+			log.debug("SERVER\tFAIL")
 			Full(JsonResponse("fail"))
 		}
 	})
