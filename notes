@@ -1,0 +1,7 @@
+Play version: 2.1.1
+
+- AWS environment vars: AWS_ACCESS_KEY_ID, AWS_SECRET_KEY
+
+- route interface: photo dimensions, name (needed? typing space on screen)
+- https
+

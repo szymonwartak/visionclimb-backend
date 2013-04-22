@@ -1,0 +1,13 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET    /api/route/getAreas                  controllers.Application.getAreas
+POST   /api/route/postArea                  controllers.Application.postArea
+GET   /api/route/getAreaClimages/:areaId    controllers.Application.getAreaClimages(areaId:String)
+GET   /api/route/getClimage/:climageId      controllers.Application.getClimage(climageId:String)
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
