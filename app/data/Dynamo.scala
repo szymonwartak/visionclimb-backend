@@ -21,6 +21,7 @@ object Dynamo {
     c
   }
 
+  // counterSet: meta (area/climage/route), 1 (areaId climages), 1_1 (climageId routes)
   def incrementCounter(counterSet:String, itemId:String) = {
     val key = new Key(new AttributeValue(counterSet))
     val avu = Map(itemId -> new AttributeValueUpdate()
@@ -52,9 +53,11 @@ object Dynamo {
     client.getItem(new GetItemRequest(tableName, new Key(new AttributeValue(itemId)))).getItem
 
   def putItem(tableName:String, pairs:Seq[Pair[String,String]]) {
-    client.putItem(new PutItemRequest(tableName, pairs.map{p => (p._1,new AttributeValue(p._2))}.toMap))
+    val items = pairs.map{p => (p._1,new AttributeValue(p._2))}.toMap
+    client.putItem(new PutItemRequest(tableName, items))
   }
   def putItemJson(tableName:String, id:String, jsonObj:String) {
+    // TODO: start in different thread, log if failed (batch job to add later?)
     putItem(tableName, List(("id",id), ("jsonObj",jsonObj)))
   }
 

@@ -13,7 +13,9 @@ object ApplicationBuild extends Build {
 //      "org.mongodb" %% "casbah" % "2.5.0",
 //      "com.novus" %% "salat" % "1.9.2-SNAPSHOT",
       "com.amazonaws" % "aws-java-sdk" % "1.4.1",
-//      "org.apache.httpcomponents" % "httpclient" % "4.2.3",
+      "commons-io" % "commons-io" % "2.4",
+
+  //      "org.apache.httpcomponents" % "httpclient" % "4.2.3",
 
   "com.lambdaworks" %% "jacks" % "2.1.4"
     )

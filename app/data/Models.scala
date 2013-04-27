@@ -32,7 +32,7 @@ object Climage {
   val tableName = "Climage"
   def scan(limit:Int = 5) = Dynamo.scan(tableName, limit)
   def getAreaClimages(areaId:String) = {
-    val keys = 1 to Dynamo.getCount("areaClimages", areaId) map{n => "%s_%s".format(areaId, n) }
+    val keys = 1 to Dynamo.getCount(areaId, "count") map{n => "%s_%s".format(areaId, n) }
     Dynamo.getJsonItemsFromTable(tableName, keys)
   }
   def getClimage(climageId:String) = Dynamo.getJsonItemFromTable(tableName, climageId)

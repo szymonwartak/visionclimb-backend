@@ -1,6 +1,9 @@
 
 import com.amazonaws.services.dynamodb.model._
 import data.{Dynamo, Area}
+import play.api.libs.Files
+import play.api.mvc.MultipartFormData
+import play.api.mvc.MultipartFormData.FilePart
 import play.api.Play
 
 import com.lambdaworks.jacks.JacksMapper
@@ -25,7 +28,7 @@ object ClimageSpec extends Specification with PreStartApp {
 		"post area" in {
 			val area = Area("2", "52", "1", "birmingham")
 			val json = JacksMapper.writeValueAsString(area)
-			val request = FakeRequest(POST, "/api/route/postArea").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
+			val request = FakeRequest(POST, "/api/route/postAreaJson").withHeaders(HeaderNames.CONTENT_TYPE -> "application/json")
 			val home = route(request,Json.parse(json)).get
 		}
     "counter increment" in {
@@ -43,7 +46,18 @@ object ClimageSpec extends Specification with PreStartApp {
 object TestSpec extends Specification with PreStartApp {
   "stuff" should {
     "do" in {
-      println(Dynamo.getJsonItemsFromTable("Area",List("2","1")))
+//      println(Dynamo.getJsonItemsFromTable("Area",List("2","1")))
+
+//      val data = new MultipartFormData(Map(
+//        ("param1" -> Seq("test-1")),
+//        ("param2" -> Seq("test-2"))
+//      ), List(
+//        FilePart("payload", "message", Some("Content-Type: multipart/form-data"), Files.TemporaryFile(new java.io.File("/Users/Szymon/me.jpg")))
+//      ), List(), List())
+//
+//      val Some(result) = route(FakeRequest(POST, "/api/route/upload", FakeHeaders(), data))
+//      println(result)
+
     }
   }
 }
