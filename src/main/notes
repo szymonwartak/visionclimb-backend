@@ -1,9 +1,0 @@
-
-- increasing max form content size for posting base64 image data
-<Call name="setAttribute"
-     <Arg>org.mortbay.jetty.Request.maxFormContentSize</Arg>
-     <Arg><New class="java.lang.Integer"><Arg>12345</Arg></New></Arg>
-  </Call>
-
-- test ClimageUpload with curl: curl -i -H "Content-Type: application/json" -X POST -d "name=asdf&description=qwer" http://localhost:8080/api/route/post/123
-	- note: climage receives Post not JsonPost as the web front ends don't send actualy json

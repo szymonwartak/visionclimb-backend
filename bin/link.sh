@@ -1,9 +1,16 @@
 #!/bin/bash
 
-# SBT: start auto-reload for browser-based running: ~;container:start; container:reload /
+if [ $# -eq 0 ]
+  then
+    DEV_DIR=/Users/Szymon/mutina/dev
+else
+    DEV_DIR=$1
+fi
 
-SOURCE_DIR=/Users/Szymon/mutina/dev/backend/public
-TARGET_DIR=/Users/Szymon/mutina/dev/PG1/assets/www
+echo $DEV_DIR
+
+SOURCE_DIR=$DEV_DIR/backend/public
+TARGET_DIR=$DEV_DIR/PG1/assets/www
 
 mkdir -p $SOURCE_DIR/js/jquery.ui.map
 mkdir -p $SOURCE_DIR/css

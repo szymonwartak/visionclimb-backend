@@ -1,5 +1,6 @@
 package controllers
 
+import _root_.util.Logging
 import data._
 
 import play.api.mvc._
@@ -8,22 +9,23 @@ import org.apache.commons.codec.binary.Base64
 import com.lambdaworks.jacks.JacksMapper
 
 
-object Application extends Controller {
+object Application extends Controller with Logging {
 
-  def log(userId:String) = Action {
+  def postLog(userId:String) = Action(parse.urlFormEncoded) { request =>
+    log.debug(request.body.getOrElse("message", Set("0")).head)
     Ok("logged")
   }
   def getAreas(userId:String) = Action {
-    println("CALL:getAreas")
+    log.debug("CALL:getAreas")
     val result = Area.scan()
-    println("getAreas:"+result)
+    log.debug("getAreas:"+result)
     Ok(JacksMapper.writeValueAsString(result))
   }
 
   def postArea = Action(parse.urlFormEncoded) { request =>
-    println("CALL:postArea")
+    log.debug("CALL:postArea")
     val nextAreaId = Dynamo.incrementCounter("area", "count")
-    println("postArea:"+nextAreaId)
+    log.debug("postArea:"+nextAreaId)
     // TODO: reject areas with no lat/lng
     val area = Area(nextAreaId,
       request.body.getOrElse("latitude", Set("0")).head,
@@ -31,24 +33,24 @@ object Application extends Controller {
       request.body.getOrElse("name", Set("-")).head
     )
     area.write()
-    println("area written:"+area)
+    log.debug("area written:"+area)
     Ok(JacksMapper.writeValueAsString(area))
   }
 	def postAreaJson = Action(parse.json) { request =>
 		request.body.validate(Json.reads[Area]).map { area =>
-			println("postArea: "+area)
+			log.debug("postArea: "+area)
       area.write()
 			Ok("ok")
 		}.get
 	}
   def getAreaClimages(areaId:String, userId:String) = Action {
     val climages = Climage.getAreaClimages(areaId)
-    println("getAreaClimages:"+climages)
+    log.debug("getAreaClimages:"+climages)
     climages.foreach {climage =>
-      println("routes (%s):".format(climage.climageId)+JacksMapper.writeValueAsString(climage.routes))
-      println("climage:"+JacksMapper.writeValueAsString(climage))
+      log.debug("routes (%s):".format(climage.climageId)+JacksMapper.writeValueAsString(climage.routes))
+      log.debug("climage:"+JacksMapper.writeValueAsString(climage))
     }
-    println("allJSON:"+JacksMapper.writeValueAsString(climages))
+    log.debug("allJSON:"+JacksMapper.writeValueAsString(climages))
     Ok(JacksMapper.writeValueAsString(climages))
   }
   def getClimage(climageId:String, userId:String) = Action {
@@ -56,7 +58,7 @@ object Application extends Controller {
       case Some(climage) => JacksMapper.writeValueAsString(climage)
       case None => "{}"
     }
-    println("getClimage:"+json)
+    log.debug("getClimage:"+json)
     Ok(json)
   }
   val base64Decoder = new Base64();
@@ -66,39 +68,39 @@ object Application extends Controller {
     Ok("ok")
   }
   def postRouteWithImage = Action(parse.urlFormEncoded(1024*1024)) { request =>
-    println("CALL-postRouteWithImage")
+    log.debug("CALL-postRouteWithImage")
     // TODO: climage with no lat/lng defaults to area info
     val imageData = request.body.getOrElse("imageData",Set("")).head
     val s3ImageId = S3.putFile(imageData)
-    println("imageID:"+s3ImageId)
+    log.debug("imageID:"+s3ImageId)
 
     val areaId = request.body.getOrElse("areaId", Set("")).head
-    println("areaId:"+areaId)
+    log.debug("areaId:"+areaId)
     val nextClimageId = "%s_%s".format(areaId, Dynamo.incrementCounter(areaId, "count"))
-    println("climageID:"+nextClimageId)
+    log.debug("climageID:"+nextClimageId)
     val nextRouteId = "%s_%s".format(nextClimageId, Dynamo.incrementCounter(nextClimageId, "count"))
-    println("area:%s climage:%s route:%s s3id:%s".format(areaId, nextClimageId, nextRouteId, s3ImageId))
+    log.debug("area:%s climage:%s route:%s s3id:%s".format(areaId, nextClimageId, nextRouteId, s3ImageId))
     val climage = Climage(nextClimageId,
       request.body.getOrElse("latitude",Set("")).head,
       request.body.getOrElse("longitude",Set("")).head,
       request.body.getOrElse("name",Set("")).head,
       s3ImageId
     )
-    println("climage:"+climage)
+    log.debug("climage:"+climage)
     climage.writeJson()
-    println("climage written")
+    log.debug("climage written")
     val route = Route(nextRouteId,
       request.body.getOrElse("name",Set("")).head,
       request.body.getOrElse("grade",Set("")).head,
       request.body.getOrElse("routePointsX",Set("")).head,
       request.body.getOrElse("routePointsY",Set("")).head
     )
-    println(route)
+    log.debug(route.toString)
     route.writeJson()
-    println("route written")
+    log.debug("route written")
 
-
-    Ok("""{"routeId":%s,"climageId":%s,"imageId":%s}""".format(nextRouteId, nextClimageId, s3ImageId))
+    Ok(Json.toJson(Map("routeId"->nextRouteId, "climageId"->nextClimageId, "imageId"->s3ImageId)))
+//    Ok("""{"routeId":%s,"climageId":%s,"imageId":%s}""".format(nextRouteId, nextClimageId, s3ImageId))
   }
   def postRoute = Action(parse.urlFormEncoded) { request =>
     val climageId = request.body.getOrElse("climageId", Set("0")).head

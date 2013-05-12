@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-POST   /api/route/log/:userId                  controllers.Application.log(userId:String)
+POST   /api/route/log/:userId                  controllers.Application.postLog(userId:String)
 POST   /api/route/postArea                  controllers.Application.postArea
 POST   /api/route/uploadImage                  controllers.Application.uploadImage
 POST   /api/route/postRouteWithImage                  controllers.Application.postRouteWithImage
@@ -13,7 +13,7 @@ GET   /api/route/getAreaClimages/:areaId/:userId    controllers.Application.getA
 GET   /api/route/getClimage/:climageId/:userId      controllers.Application.getClimage(climageId:String, userId:String)
 
 # dev linked mobile pages (these can actually be loaded directly)
-#GET     /               controllers.Assets.at(path="/public", file="index.scala.html")
+GET     /               controllers.Assets.at(path="/public", file="asdf.html")
 GET     /*file               controllers.Assets.at(path="/public", file)
 GET     /js/*file               controllers.Assets.at(path="/public/js", file)
 GET     /js/jquery.ui.map/*file               controllers.Assets.at(path="/public/js/jquery.ui.map", file)
