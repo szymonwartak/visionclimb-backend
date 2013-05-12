@@ -7,7 +7,7 @@ POST   /api/route/log/:userId                  controllers.Application.log(userI
 POST   /api/route/postArea                  controllers.Application.postArea
 POST   /api/route/uploadImage                  controllers.Application.uploadImage
 POST   /api/route/postRouteWithImage                  controllers.Application.postRouteWithImage
-#POST   /api/route/postRoute                  controllers.Application.postRoute
+POST   /api/route/postRoute                  controllers.Application.postRoute
 GET    /api/route/getAreas/:userId                  controllers.Application.getAreas(userId:String)
 GET   /api/route/getAreaClimages/:areaId/:userId    controllers.Application.getAreaClimages(areaId:String, userId:String)
 GET   /api/route/getClimage/:climageId/:userId      controllers.Application.getClimage(climageId:String, userId:String)

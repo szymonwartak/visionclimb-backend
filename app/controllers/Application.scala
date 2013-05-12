@@ -44,6 +44,11 @@ object Application extends Controller {
   def getAreaClimages(areaId:String, userId:String) = Action {
     val climages = Climage.getAreaClimages(areaId)
     println("getAreaClimages:"+climages)
+    climages.foreach {climage =>
+      println("routes (%s):".format(climage.climageId)+JacksMapper.writeValueAsString(climage.routes))
+      println("climage:"+JacksMapper.writeValueAsString(climage))
+    }
+    println("allJSON:"+JacksMapper.writeValueAsString(climages))
     Ok(JacksMapper.writeValueAsString(climages))
   }
   def getClimage(climageId:String, userId:String) = Action {
@@ -82,31 +87,32 @@ object Application extends Controller {
     println("climage:"+climage)
     climage.writeJson()
     println("climage written")
-//    val route = Route(nextRouteId,
-//      request.body.getOrElse("name",Set("")).head,
-//      request.body.getOrElse("grade",Set("")).head,
-//      request.body.getOrElse("routePointsX",Set("")).head,
-//      request.body.getOrElse("routePointsY",Set("")).head
-//    )
-//    println(route)
-//    route.writeJson()
-//    println("route written")
+    val route = Route(nextRouteId,
+      request.body.getOrElse("name",Set("")).head,
+      request.body.getOrElse("grade",Set("")).head,
+      request.body.getOrElse("routePointsX",Set("")).head,
+      request.body.getOrElse("routePointsY",Set("")).head
+    )
+    println(route)
+    route.writeJson()
+    println("route written")
 
 
-    Ok("""{"route":%s,"climageId":%s,"imageId":%s}""".format(nextRouteId, nextClimageId, s3ImageId))
+    Ok("""{"routeId":%s,"climageId":%s,"imageId":%s}""".format(nextRouteId, nextClimageId, s3ImageId))
   }
-//  def postRoute = Action(parse.urlFormEncoded) { request =>
-//    val climageId = request.body.getOrElse("climageId", Set("0")).head
-//    val nextRouteId = Dynamo.incrementCounter(climageId, "count")
-//    val route = Route(nextRouteId,
-//      request.body.getOrElse("routeName", Set("0")).head,
-//      request.body.getOrElse("grade", Set("0")).head,
-//      request.body.getOrElse("routePointsX", Set("0")).head,
-//      request.body.getOrElse("routePointsY", Set("0")).head
-//    )
-//    route.writeJson()
-//    Ok("""{"route":%s,"imageId":%s}""".format(nextRouteId, climageId))
-//  }
+  def postRoute = Action(parse.urlFormEncoded) { request =>
+    val climageId = request.body.getOrElse("climageId", Set("0")).head
+    val nextRouteId = "%s_%s"format(climageId, Dynamo.incrementCounter(climageId, "count"))
+    val route = Route(nextRouteId,
+      request.body.getOrElse("name", Set("0")).head,
+      request.body.getOrElse("grade", Set("0")).head,
+      request.body.getOrElse("routePointsX", Set("0")).head,
+      request.body.getOrElse("routePointsY", Set("0")).head
+    )
+    route.writeJson()
+    Ok(Json.toJson(Map("routeId"->nextRouteId, "climageId"->climageId)))
+//    Ok("""{"routeId":%s,"climageId":%s}""".format(nextRouteId, climageId))
+  }
 
 }
 
