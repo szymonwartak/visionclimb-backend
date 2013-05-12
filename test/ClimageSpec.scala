@@ -46,6 +46,7 @@ object ClimageSpec extends Specification with PreStartApp {
 object TestSpec extends Specification with PreStartApp {
   "stuff" should {
     "do" in {
+      println(Dynamo.getItemFromTable(Area.tableName,"nothing"))
 //      println(Dynamo.getJsonItemsFromTable("Area",List("2","1")))
 
 //      val data = new MultipartFormData(Map(

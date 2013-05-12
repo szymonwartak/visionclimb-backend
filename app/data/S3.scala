@@ -2,12 +2,16 @@ package data
 
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.regions.{Regions, Region}
-import java.io.{FileInputStream, ByteArrayOutputStream, File}
+import java.io._
 import java.security.MessageDigest
 import org.apache.commons.io.IOUtils
-import org.apache.commons.codec.binary.Hex
+import org.apache.commons.codec.binary.{Base64, Hex}
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import org.apache.commons.codec.digest.DigestUtils
+import com.amazonaws.services.s3.model.{CannedAccessControlList, PutObjectRequest, ObjectMetadata}
+import play.api.mvc.BodyParsers.parse
+import sun.misc.BASE64Decoder
+import javax.imageio.ImageIO
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,17 +29,27 @@ object S3 {
     c
   }
 
-  def putFile(file:File) = {
-    val key = getKey(file)
-    val result = client.putObject(domain, key, file)
-    if (getFileMD5(file) != result.getETag)
-      println("MD5 mismatch!")
+  def putFile(dataStr:String) = {
+    println("CALL:putFile")
+    val data = dataStr.substring(dataStr.indexOf("base64,")+7,dataStr.size-1)
+    val imgBytes = new Base64().decode(data.getBytes("UTF-8"))
+    val key = getKey(imgBytes)
+    println("key: "+key)
+    val filename = "/tmp/%s.png".format(key)
+    val osf = new FileOutputStream(filename)
+    osf.write(imgBytes); osf.flush()
+    println("file written:"+filename)
+
+    val result = client.putObject(new PutObjectRequest(domain, key, new File(filename)).withCannedAcl(CannedAccessControlList.PublicRead))
+    println("uploaded to S3")
+//    if (getFileMD5(data) != result.getETag)
+//      println("MD5 mismatch!")
     key
   }
-  def getKey(file:File) = System.currentTimeMillis().toString+file.hashCode().toString
+  def getKey(data:Array[Byte]) = System.currentTimeMillis().toString+data.hashCode().toString
   val md5 = MessageDigest.getInstance("MD5");
-  def getFileMD5(file:File) =
-   DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(file)))
+  def getFileMD5(data:Array[Byte]) =
+   DigestUtils.md5Hex(data)
 
-  putFile(new File("/Users/Szymon/me.jpg"))
 }
+

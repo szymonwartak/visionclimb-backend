@@ -3,11 +3,19 @@
 # ~~~~
 
 # Home page
-GET    /api/route/getAreas                  controllers.Application.getAreas
+POST   /api/route/log/:userId                  controllers.Application.log(userId:String)
 POST   /api/route/postArea                  controllers.Application.postArea
-GET   /api/route/getAreaClimages/:areaId    controllers.Application.getAreaClimages(areaId:String)
-GET   /api/route/getClimage/:climageId      controllers.Application.getClimage(climageId:String)
+POST   /api/route/uploadImage                  controllers.Application.uploadImage
+POST   /api/route/postRouteWithImage                  controllers.Application.postRouteWithImage
+#POST   /api/route/postRoute                  controllers.Application.postRoute
+GET    /api/route/getAreas/:userId                  controllers.Application.getAreas(userId:String)
+GET   /api/route/getAreaClimages/:areaId/:userId    controllers.Application.getAreaClimages(areaId:String, userId:String)
+GET   /api/route/getClimage/:climageId/:userId      controllers.Application.getClimage(climageId:String, userId:String)
 
+# dev linked mobile pages (these can actually be loaded directly)
+#GET     /               controllers.Assets.at(path="/public", file="index.scala.html")
+GET     /*file               controllers.Assets.at(path="/public", file)
+GET     /js/*file               controllers.Assets.at(path="/public/js", file)
+GET     /js/jquery.ui.map/*file               controllers.Assets.at(path="/public/js/jquery.ui.map", file)
+GET     /css/*file               controllers.Assets.at(path="/public/css", file)
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)

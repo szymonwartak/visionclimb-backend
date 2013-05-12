@@ -23,46 +23,45 @@ object Dynamo {
 
   // counterSet: meta (area/climage/route), 1 (areaId climages), 1_1 (climageId routes)
   def incrementCounter(counterSet:String, itemId:String) = {
+    println("CALL-dynamo:incrementcounter(%s,%s)".format(counterSet,itemId))
     val key = new Key(new AttributeValue(counterSet))
     val avu = Map(itemId -> new AttributeValueUpdate()
       .withValue(new AttributeValue().withN("1"))
       .withAction(AttributeAction.ADD))
+    println("updating counter: %s %s".format(counterSet, itemId))
     client.updateItem(new UpdateItemRequest("Counters", key, avu).withReturnValues(ReturnValue.ALL_NEW)).getAttributes().get(itemId).getN
   }
-  def getCount(counterSet:String, itemId:String) = getItemFieldFromTable("Counters", counterSet, itemId).getN.toInt
-
-  def scan(tableName:String, limit:Int) =
-    JacksMapper.writeValueAsString(client.scan(new ScanRequest(tableName).withLimit(limit)).getItems.map(_.get("jsonObj").getS))
-  def getJsonItemsFromTable(tableName:String, keys:Seq[String]) = {
-    val items = client
-      .batchGetItem(new BatchGetItemRequest().withRequestItems(Map(tableName -> new KeysAndAttributes()
-        .withKeys(keys.map{ key => new Key(new AttributeValue(key)) } ))))
-      .getResponses().get(tableName).getItems
-      .flatMap{ climage => Option(climage.get("jsonObj")) }
-      .map{ climage => climage.getS }
-    JacksMapper.writeValueAsString(items)
-  }
-  def getJsonItemFromTable(tableName:String, id:String) =
-    Option(getItemFromTable(tableName, id).get("jsonObj")) match {
-      case Some(jsonObj) => jsonObj.getS
-      case None => "{}"
+  def getCount(counterSet:String, itemId:String) = {
+    println("CALL-dynamo:getcount(%s,%s)".format(counterSet,itemId))
+    getItemFieldFromTable("Counters", counterSet, itemId) match {
+      case Some(counter) => counter.getN.toInt
+      case None => 0
     }
-  def getItemFieldFromTable(tableName:String, itemId:String, fieldId:String) =
-    getItemFromTable(tableName, itemId).get(fieldId)
-  def getItemFromTable(tableName:String, itemId:String) =
-    client.getItem(new GetItemRequest(tableName, new Key(new AttributeValue(itemId)))).getItem
-
+  }
+  def getItemFieldFromTable(tableName:String, itemId:String, fieldId:String) = {
+    println("CALL-dynamo:getItemFieldFromTable(%s,%s,%s)".format(tableName,itemId,fieldId))
+    getItemFromTable(tableName, itemId) match {
+      case Some(item) => Option(item.get(fieldId))
+      case None => None
+    }
+  }
+  def getItemFromTable(tableName:String, itemId:String) = {
+    println("CALL-dynamo:getItemFromTable(%s,%s)".format(tableName,itemId))
+    Option(client.getItem(new GetItemRequest(tableName, new Key(new AttributeValue(itemId)))).getItem)
+  }
+  def getItemsFromTable(tableName:String, itemIds:List[String]) = {
+    println("CALL-dynamo:getItemsFromTable(%s,%s)".format(tableName,itemIds))
+    client.batchGetItem(new BatchGetItemRequest().withRequestItems(Map(tableName -> new KeysAndAttributes().withKeys(
+      itemIds.map{ itemId => new Key().withHashKeyElement(new AttributeValue(itemId)) }
+    ))))
+  }
   def putItem(tableName:String, pairs:Seq[Pair[String,String]]) {
+    println("CALL-dynamo:putItem(%s,%s)".format(tableName,pairs))
     val items = pairs.map{p => (p._1,new AttributeValue(p._2))}.toMap
     client.putItem(new PutItemRequest(tableName, items))
-  }
-  def putItemJson(tableName:String, id:String, jsonObj:String) {
-    // TODO: start in different thread, log if failed (batch job to add later?)
-    putItem(tableName, List(("id",id), ("jsonObj",jsonObj)))
   }
 
 }
 
-case class JsonObjWrapper(jsonObj:String, id:String)
 
 
